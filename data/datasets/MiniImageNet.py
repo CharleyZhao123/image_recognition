@@ -4,9 +4,9 @@ from PIL import Image
 from torch.utils.data import Dataset
 
 
-class MultiViewBaggage(object):
+class MiniImageNet(object):
     def __init__(self, cfg, dataset_type='train'):
-        super(MultiViewBaggage, self).__init__()
+        super(MiniImageNet, self).__init__()
 
         self.dataset_path = cfg.MODEL.DATA_PATH
         if dataset_type is 'train':

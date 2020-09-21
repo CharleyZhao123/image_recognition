@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import DataLoader
 from data.transforms import build_transform
-from data.datasets import MultiViewBaggage, ImageDataset
+from data.datasets import MiniImageNet, ImageDataset
 
 from data.samplers import RandomIdentitySampler
 

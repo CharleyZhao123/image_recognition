@@ -38,11 +38,10 @@ def train(config, experiment_name=None):
     # prepare model
     model = build_model(cfg=config)
 
-    print('Train with center loss, the loss type is',
+    print('The loss type is',
           config.MODEL.METRIC_LOSS_TYPE)
-    loss_func, center_criterion = build_loss(config, num_classes)
-    optimizer, optimizer_center = build_optimizer(config, model,
-                                                  center_criterion)
+    loss_func = build_loss(config, num_classes)
+    optimizer, optimizer_center = build_optimizer(config, model)
 
     # Add for using self trained model
     if config.MODEL.PRETRAIN_CHOICE == 'self':
@@ -62,8 +61,6 @@ def train(config, experiment_name=None):
               path_to_optimizer_center)
         model.load_state_dict(torch.load(config.MODEL.PRETRAIN_PATH))
         optimizer.load_state_dict(torch.load(path_to_optimizer))
-        center_criterion.load_state_dict(torch.load(path_to_center_param))
-        optimizer_center.load_state_dict(torch.load(path_to_optimizer_center))
 
     scheduler = WarmUpMultiStepLR(optimizer, config.SOLVER.STEPS,
                                   config.SOLVER.GAMMA,
@@ -72,14 +69,14 @@ def train(config, experiment_name=None):
                                   config.SOLVER.WARMUP_METHOD)
 
     print('------------------ Start Training -------------------')
-    do_train(config, model, center_criterion, train_loader, val_gallery_loader,
-             val_probe_loader, optimizer, optimizer_center, scheduler,
+    do_train(config, model, train_loader, val_gallery_loader,
+             val_probe_loader, optimizer, scheduler,
              loss_func, experiment_name)
     print('---------------- Training Completed ---------------- ')
 
 
 def main():
-    parser = argparse.ArgumentParser(description="MVB ReID Training")
+    parser = argparse.ArgumentParser(description="Image Classification Training")
     parser.add_argument("--config_file",
                         default="",
                         help="path to config file",

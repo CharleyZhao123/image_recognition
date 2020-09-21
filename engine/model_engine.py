@@ -5,11 +5,11 @@ import logging
 import torch.cuda
 import numpy as np
 import torch.nn as nn
-from utils import R1_mAP, AverageMeter, generate_merge_result
+from utils import AverageMeter, generate_merge_result
 
 
-def do_train(cfg, model, center_criterion, train_loader, val_gallery_loader,
-             val_probe_loader, optimizer, optimizer_center, scheduler, loss_fn,
+def do_train(cfg, model, train_loader, val_gallery_loader,
+             val_probe_loader, optimizer, scheduler, loss_fn,
              experiment_name):
     device = cfg.MODEL.DEVICE
     epochs = cfg.SOLVER.MAX_EPOCHS
@@ -17,8 +17,6 @@ def do_train(cfg, model, center_criterion, train_loader, val_gallery_loader,
     eval_period = cfg.SOLVER.EVAL_PERIOD
     checkpoint_period = cfg.SOLVER.CHECKPOINT_PERIOD
     output_dir = os.path.join(cfg.MODEL.OUTPUT_PATH, experiment_name)
-
-    embedding_metric = cfg.TEST.METHOD
 
     val_period = 'val'
 
@@ -35,36 +33,25 @@ def do_train(cfg, model, center_criterion, train_loader, val_gallery_loader,
     loss_meter = AverageMeter()
     acc_meter = AverageMeter()
 
-    evaluator = R1_mAP(feat_norm=cfg.TEST.FEAT_NORM,
-                       metric=embedding_metric,
-                       period=val_period)
     # train
     for epoch in range(1, epochs + 1):
         start_time = time.time()
         loss_meter.reset()
         acc_meter.reset()
-        evaluator.reset()
-        evaluator.period = val_period
-
         scheduler.step()
 
         model.train()
         one_epoch_iterations = 0
         for iteration, (img, vid) in enumerate(train_loader):
             optimizer.zero_grad()
-            optimizer_center.zero_grad()
             img = img.to(device)
             target = vid.to(device)
 
-            score, feat = model(img)
-            loss = loss_fn(score, feat, target)
+            score = model(img)
+            loss = loss_fn(score, target)
 
             loss.backward()
             optimizer.step()
-            for param in center_criterion.parameters():
-                # Increase the weight of center loss with regard to center embeddings
-                param.grad.data *= (1. / cfg.SOLVER.CENTER_LOSS_WEIGHT)
-            optimizer_center.step()
 
             acc = (score.max(1)[1] == target).float().mean()
             loss_meter.update(loss.item(), img.shape[0])
@@ -88,7 +75,7 @@ def do_train(cfg, model, center_criterion, train_loader, val_gallery_loader,
         if epoch % checkpoint_period == 0:
             checkpoint_path = os.path.join(
                 output_dir,
-                'MVB_Reid_' + experiment_name + '_{}.pth'.format(epoch))
+                'Image_Classification_' + experiment_name + '_{}.pth'.format(epoch))
             torch.save(model.state_dict(), checkpoint_path)
 
         if epoch % eval_period == 0:

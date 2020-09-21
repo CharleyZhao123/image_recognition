@@ -10,7 +10,7 @@ def build_loss(cfg, num_classes):
     label_smoothing = CrossEntropyLabelSmooth(
         num_classes=num_classes)  # softmax_with_label_smoothing
 
-    def loss_func(score, feat, target):
+    def loss_func(score, target):
         loss = id_loss_weight * f.cross_entropy(score, target)  # softmax loss
 
         if 'label_smoothing' in loss_metric:
