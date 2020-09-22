@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import DataLoader
 from data.transforms import build_transform
-from data.datasets import MiniImageNet, ImageDataset
+from data.datasets import MiniClassification, ImageDataset
 
 from data.samplers import RandomIdentitySampler
 
@@ -26,8 +26,8 @@ def build_dataloader(cfg, period='train', loader_type='train'):
     test_transform = build_transform(cfg=cfg, period=test_period)
 
     if period is 'train':
-        train_mini = MiniImageNet(cfg=cfg, dataset_type='train')
-        val_mini = MiniImageNet(cfg=cfg, dataset_type='val')
+        train_mini = MiniClassification(cfg=cfg, dataset_type='train')
+        val_mini = MiniClassification(cfg=cfg, dataset_type='val')
 
         if loader_type is 'train':
             train = train_mini.train

@@ -28,14 +28,20 @@ def do_train(cfg, model, train_loader, val_loader,
             model = nn.DataParallel(model)
         model.to(device)
 
-    loss_meter = AverageMeter()
-    acc_meter = AverageMeter()
+    train_loss_meter = AverageMeter()
+    train_acc_meter = AverageMeter()
+    val_loss_meter = AverageMeter()
+    val_acc_meter = AverageMeter()
 
     # train
     for epoch in range(1, epochs + 1):
         start_time = time.time()
-        loss_meter.reset()
-        acc_meter.reset()
+
+        train_loss_meter.reset()
+        train_acc_meter.reset()
+        val_loss_meter.reset()
+        val_acc_meter.reset()
+
         scheduler.step()
 
         model.train()
@@ -53,14 +59,14 @@ def do_train(cfg, model, train_loader, val_loader,
             optimizer.step()
 
             acc = (score.max(1)[1] == target).float().mean()
-            loss_meter.update(loss.item(), img.shape[0])
-            acc_meter.update(acc, 1)
+            train_loss_meter.update(loss.item(), img.shape[0])
+            train_acc_meter.update(acc, 1)
 
             if (iteration + 1) % log_period == 0:
                 logger.info(
-                    "Epoch[{}/{}] Iteration[{}/{}] Loss: {:.3f}, Acc: {:.3f}, Base Lr: {:.2e}"
+                    "Epoch[{}/{}] Iteration[{}/{}] Train_Loss: {:.3f}, Train_Acc: {:.3f}, Base Lr: {:.2e}"
                     .format(epoch, epochs, (iteration + 1), len(train_loader),
-                            loss_meter.avg, acc_meter.avg,
+                            train_loss_meter.avg, train_acc_meter.avg,
                             scheduler.get_lr()[0]))
             one_epoch_iterations += 1
 
@@ -79,25 +85,22 @@ def do_train(cfg, model, train_loader, val_loader,
 
         if epoch % eval_period == 0:
             model.eval()
-            for iteration, (img, baggage_id) in enumerate(val_gallery_loader):
+            for iteration, (img, vid) in enumerate(val_loader):
                 with torch.no_grad():
                     img = img.to(device)
-                    val_gallery_feature = model(img)
-                    evaluator.update((val_gallery_feature, baggage_id),
-                                     feature_type='gallery')
+                    vid = torch.tensor(vid)
+                    target = vid.to(device)
+                    score = model(img)
+                    loss = loss_fn(score, target)
 
-            for iteration, (img, _, baggage_id) in enumerate(val_probe_loader):
-                with torch.no_grad():
-                    img = img.to(device)
-                    val_probe_feat = model(img)
-                    evaluator.update((val_probe_feat, baggage_id),
-                                     feature_type='probe')
+                    acc = (score.max(1)[1] == target).float().mean()
+                    val_loss_meter.update(loss.item(), img.shape[0])
+                    val_acc_meter.update(acc, 1) 
 
-            logger = logging.getLogger('{}.val'.format(cfg.PROJECT.NAME))
-            logger.info("Train Validation Results - Epoch: {}".format(epoch))
-            evaluator.compute(logger)
-            logger = logging.getLogger('{}.train'.format(cfg.PROJECT.NAME))
-
+                logger.info(
+                    "Epoch[{}/{}] Iteration[{}/{}] Val_Loss: {:.3f}, Val_Acc: {:.3f}"
+                    .format(epoch, epochs, (iteration + 1), len(val_loader),
+                            val_loss_meter.avg, val_acc_meter.avg))
 
 def do_inference(cfg, model, inference_gallery_loader, inference_probe_loader,
                  experiment_name):
