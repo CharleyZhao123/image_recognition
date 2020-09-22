@@ -7,34 +7,30 @@ from model import build_model
 from torch.backends import cudnn
 from data import build_dataloader
 from utils.logger import setup_logger
-from engine.model_engine import do_inference
+from engine.model_engine import do_test
 
 
-def inference(config, experiment_name=None):
-    # dataloader for inference
-    inference_period = 'inference'
-    inference_gallery_loader = build_dataloader(cfg,
-                                                period=inference_period,
-                                                loader_type='gallery')
-    inference_probe_loader, inference_num_probe = build_dataloader(
-        cfg, period=inference_period, loader_type='probe')
+def test(config, experiment_name=None):
+    # dataloader for test
+    test_period = 'test'
+    test_loader = build_dataloader(cfg=config,
+                                   period=test_period,
+                                   loader_type='test')
 
     # prepare model
     model = build_model(cfg=config)
     model.load_param(config.TEST.WEIGHT)
-    print('Evaluate model with ', config.TEST.METHOD)
 
-    print('------------------ Start Inference -------------------')
-    do_inference(config, model, inference_gallery_loader,
-                 inference_probe_loader, experiment_name)
+    print('------------------ Start Test -------------------')
+    do_test(config, model, test_loader, experiment_name)
     print('---------------- Inference Completed -----------------')
 
 
 def main():
-    parser = argparse.ArgumentParser(description="MVB ReID Inference")
+    parser = argparse.ArgumentParser(description="Image Classification Test")
     parser.add_argument("--config_file",
                         default="",
-                        help="path to inference config file",
+                        help="path to test config file",
                         type=str)
     parser.add_argument("opts",
                         help="Modify config options using the command-line",
@@ -46,11 +42,11 @@ def main():
     num_gpu = int(
         os.environ["WORLD_SIZE"]) if "WORLD_SIZE" in os.environ else 1
 
-    experiment_name = 'no_config.inference'
+    experiment_name = 'no_config.test'
     if args.config_file != "":
         cfg.merge_from_file(args.config_file)
         experiment_name = args.config_file.split('/')[-1].split(
-            '.')[0] + '.inference'
+            '.')[0] + '.test'
     cfg.merge_from_list(args.opts)
     cfg.freeze()
 
@@ -76,7 +72,7 @@ def main():
         os.environ['CUDA_VISIBLE_DEVICES'] = cfg.MODEL.DEVICE_ID
     cudnn.benchmark = True
 
-    inference(cfg, experiment_name=experiment_name)
+    test(cfg, experiment_name=experiment_name)
 
 
 if __name__ == '__main__':

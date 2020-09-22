@@ -28,7 +28,7 @@ def build_transform(cfg, period='train'):
     else:
         transform = transforms.Compose([
             transforms.Resize(input_size),
-            transforms.ToTensor(), normalize_transform
+            transforms.ToTensor(), normalize_transform,
         ])
 
     return transform

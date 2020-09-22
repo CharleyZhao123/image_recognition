@@ -9,7 +9,6 @@ from model import build_model
 from torch.backends import cudnn
 from data import build_dataloader
 from utils.logger import setup_logger
-from engine.inference import inference
 from utils.plot_curve import plot_curve
 from engine.model_engine import do_train
 from solver import build_optimizer, WarmUpMultiStepLR
@@ -115,8 +114,6 @@ def main():
     except Exception as e:
         print(e)
 
-
-#    inference(cfg, experiment_name=experiment_name)
 
 if __name__ == '__main__':
     main()

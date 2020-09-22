@@ -100,53 +100,47 @@ def do_train(cfg, model, train_loader, val_loader,
                         .format(epoch, epochs, (iteration + 1), len(val_loader),
                                 val_loss_meter.avg, val_acc_meter.avg))
 
-def do_inference(cfg, model, inference_gallery_loader, inference_probe_loader,
-                 experiment_name):
+def do_test(cfg, model, test_loader, experiment_name):
+    test_acc_meter = AverageMeter()
+    test_acc_meter.reset()
+
     device = cfg.MODEL.DEVICE
-    embedding_metric = cfg.TEST.METHOD
-    output_dir = os.path.join(cfg.MODEL.OUTPUT_PATH, experiment_name)
+    # output_dir = os.path.join(cfg.MODEL.OUTPUT_PATH, experiment_name)
 
-    result_path = os.path.join(
-        output_dir,
-        experiment_name + '_' + embedding_metric + '_' + 'reid_result.csv')
-
-    logger = logging.getLogger('{}.inference'.format(cfg.PROJECT.NAME))
-    logger.info("Enter MVB Reid Inference")
-
-    probe_features = []
-    probe_image_names = []
-    gallery_features = []
-    gallery_baggage_ids = []
+    logger = logging.getLogger('{}.test'.format(cfg.PROJECT.NAME))
+    logger.info("Enter Image Classification Test")
 
     if device:
         if torch.cuda.device_count() > 1:
-            print('Using {} GPUs for inference'.format(
+            print('Using {} GPUs for test'.format(
                 torch.cuda.device_count()))
             model = nn.DataParallel(model)
         model.to(device)
 
     model.eval()
-    for iteration, (img, baggage_id) in enumerate(inference_gallery_loader):
 
+    for iteration, (img, vid) in enumerate(test_loader):
         with torch.no_grad():
             img = img.to(device)
-            inference_gallery_feature = model(img)
+            vid = torch.tensor(vid)
+            target = vid.to(device)            
+            score = model(img)
 
-            gallery_features.append(inference_gallery_feature)
-            gallery_baggage_ids.extend(np.asarray(baggage_id))
+            acc = (score.max(1)[1] == target).float().mean()
+            test_acc_meter.update(acc, 1)
 
-    for iteration, (img, image_name) in enumerate(inference_probe_loader):
-        with torch.no_grad():
-            img = img.to(device)
-            inference_probe_feature = model(img)
+            logger.info(
+                "Iteration[{}/{}], Test_Acc: {:.3f}"
+                .format((iteration + 1), len(test_loader), test_acc_meter.avg))
 
-            probe_image_names.extend(image_name)
-            probe_features.append(inference_probe_feature)
+    # result_path = os.path.join(
+    #     output_dir,
+    #     experiment_name  + '_' + 'test_result.csv')
 
-    generate_merge_result(cfg,
-                          probe_features,
-                          gallery_features,
-                          probe_image_names,
-                          gallery_baggage_ids,
-                          metric=embedding_metric,
-                          result_path=result_path)
+    # generate_merge_result(cfg,
+    #                       probe_features,
+    #                       gallery_features,
+    #                       probe_image_names,
+    #                       gallery_baggage_ids,
+    #                       metric=embedding_metric,
+    #                       result_path=result_path)

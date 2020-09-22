@@ -1,3 +1,3 @@
 #!/bin/bash
 
-python engine/inference.py --config_file ./config/path_cfg.yml
+python engine/test.py --config_file ./experiments/experiment_template.yml MODEL.DEVICE_ID "('4')"

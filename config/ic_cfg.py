@@ -72,7 +72,6 @@ _C.SOLVER.IMS_PER_BATCH = 80  # Number of images per batch
 _C.TEST = CfgNode()
 _C.TEST.IMS_PER_BATCH = 128  # Number of images per batch during test
 _C.TEST.WEIGHT = "/space1/home/chenyanxian/RemoteProject/MVB_Reid/MVB_Reid_experiment_1_120.pth"  # Path to trained model
-_C.TEST.NECK_FEAT = 'after'  # Which feature of BN-neck to be used for test, before or after BN-neck
 _C.TEST.FEAT_NORM = 'yes'  # Whether feature is normalized before test if yes, it is equivalent to cosine distance
 
 

@@ -49,6 +49,7 @@ class ClassificationNet(nn.Module):
         self.num_classes = num_classes
 
         self.classifier = nn.Linear(self.in_planes, self.num_classes, bias=False)
+
         self.classifier.apply(weights_init_classifier)
 
     def forward(self, x):
@@ -62,14 +63,12 @@ class ClassificationNet(nn.Module):
             cls_score = self.classifier(feat)
             return cls_score
 
-    # load pretrained ReidNet
+    # load pretrained model
     def load_param(self, trained_path):
         param_dict = torch.load(trained_path)
         for i in param_dict:
-            if 'classifier' in i:
-                continue
             self.state_dict()[i].copy_(param_dict[i])
 
 
 if __name__ == '__main__':
-    reid = ClassificationNet()
+    icnet = ClassificationNet()

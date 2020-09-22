@@ -68,38 +68,19 @@ def build_dataloader(cfg, period='train', loader_type='train'):
             return val_loader
 
     else:
-        inference_mvb = MultiViewBaggage(cfg=cfg, dataset_type='inference')
-
-        if loader_type is 'gallery':
-            inference_gallery = inference_mvb.inference_gallery
-            inference_gallery_set = ImageDataset(cfg=cfg,
-                                                 dataset=inference_gallery,
-                                                 period=inference_period,
-                                                 dataset_type='gallery',
-                                                 transform=inference_transform)
-            inference_gallery_loader = DataLoader(
-                inference_gallery_set,
-                batch_size=test_batch,
-                shuffle=False,
-                num_workers=num_workers,
-                collate_fn=gallery_collate_fn)
-            return inference_gallery_loader
-
-        else:
-            inference_num_probe = inference_mvb.num_probe
-            inference_probe = inference_mvb.inference_probe
-            inference_probe_set = ImageDataset(cfg=cfg,
-                                               dataset=inference_probe,
-                                               period=inference_period,
-                                               dataset_type='probe',
-                                               transform=inference_transform)
-            inference_probe_loader = DataLoader(
-                inference_probe_set,
-                batch_size=test_batch,
-                shuffle=False,
-                num_workers=num_workers,
-                collate_fn=inference_probe_collate_fn)
-            return inference_probe_loader, inference_num_probe
+        test_mini = MiniClassification(cfg=cfg, dataset_type='test')
+        test = test_mini.test
+        test_set = ImageDataset(cfg=cfg,
+                                dataset=test,
+                                period=test_period,
+                                dataset_type='test',
+                                transform=test_transform)
+        test_loader = DataLoader(test_set,
+                                 batch_size=test_batch,
+                                 shuffle=False,
+                                 num_workers=num_workers,
+                                 collate_fn = collate_fn)
+        return test_loader
 
 
 if __name__ == '__main__':
