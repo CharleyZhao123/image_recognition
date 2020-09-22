@@ -1,1 +1,1 @@
-from .triplet_sampler import RandomIdentitySampler
+from .random_sampler import RandomIdentitySampler

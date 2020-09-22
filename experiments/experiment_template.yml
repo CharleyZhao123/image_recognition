@@ -4,12 +4,11 @@ PROJECT:
   PATH: '/space1/zhaoqing/code/image_recognition'
 
 MODEL:
-  PRETRAIN_PATH: '/space1/home/lurq/code/luggage_reid/pretrained/resnet101-5d3b4d8f.pth'
+  PRETRAIN_PATH: '/space1/zhaoqing/code/resnet50-19c8e357.pth'
   OUTPUT_PATH: '/space1/zhaoqing/ex/image_classification_ex'
   NAME: 'resnet50'
 
 INPUT:
-  NUM_IMG_PER_ID: 4
   SIZE_TRAIN: [224, 224]
   SIZE_TEST: [224, 224]
   FLIP_PROB: 0.5 # random horizontal flip

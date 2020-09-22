@@ -5,27 +5,9 @@ from data.datasets import MiniImageNet, ImageDataset
 
 from data.samplers import RandomIdentitySampler
 
-
-def train_collate_fn(batch):
-    images, baggage_ids, _, baggage_material = zip(*batch)
-    bids = torch.tensor(baggage_ids, dtype=torch.int64)
-    return torch.stack(images, dim=0), bids
-
-
-def gallery_collate_fn(batch):
-    images, baggage_ids, _ = zip(*batch)
-    return torch.stack(images, dim=0), baggage_ids
-
-
-def val_probe_collate_fn(batch):
-    images, image_names, baggage_ids, _ = zip(*batch)
-    return torch.stack(images, dim=0), image_names, baggage_ids
-
-
-def inference_probe_collate_fn(batch):
-    images, image_names, _ = zip(*batch)
-    return torch.stack(images, dim=0), image_names
-
+def collate_fn(batch):
+    images, image_ids = zip(*batch)
+    return torch.stack(images, dim=0), image_ids
 
 # 5 types of dataloader: train:[train, gallery, probe]; inference:[gallery, probe]
 def build_dataloader(cfg, period='train', loader_type='train'):
@@ -39,15 +21,16 @@ def build_dataloader(cfg, period='train', loader_type='train'):
     test_batch = cfg.TEST.IMS_PER_BATCH
 
     train_period = 'train'
-    inference_period = 'inference'
+    test_period = 'test'
     train_transform = build_transform(cfg=cfg, period=train_period)
-    inference_transform = build_transform(cfg=cfg, period=inference_period)
+    test_transform = build_transform(cfg=cfg, period=test_period)
 
     if period is 'train':
-        train_mvb = MultiViewBaggage(cfg=cfg, dataset_type='train')
+        train_mini = MiniImageNet(cfg=cfg, dataset_type='train')
+        val_mini = MiniImageNet(cfg=cfg, dataset_type='val')
 
         if loader_type is 'train':
-            train = train_mvb.train
+            train = train_mini.train
             train_set = ImageDataset(cfg,
                                      dataset=train,
                                      period=train_period,
@@ -61,44 +44,28 @@ def build_dataloader(cfg, period='train', loader_type='train'):
                     num_workers=num_workers,
                     sampler=RandomIdentitySampler(train, train_batch,
                                                   cfg.INPUT.NUM_IMG_PER_ID),
-                    collate_fn=train_collate_fn,  # customized batch samplers
                     drop_last=True)
             else:
                 train_loader = DataLoader(train_set,
                                           batch_size=train_batch,
                                           shuffle=True,
                                           num_workers=num_workers,
-                                          collate_fn=train_collate_fn)
+                                          collate_fn = collate_fn)
             return train_loader
 
-        elif loader_type is 'gallery':
-            val_gallery = train_mvb.val_gallery
-            val_gallery_set = ImageDataset(cfg=cfg,
-                                           dataset=val_gallery,
-                                           period=train_period,
-                                           dataset_type='gallery',
-                                           transform=inference_transform)
-            val_gallery_loader = DataLoader(val_gallery_set,
-                                            batch_size=test_batch,
-                                            shuffle=False,
-                                            num_workers=num_workers,
-                                            collate_fn=gallery_collate_fn)
-            return val_gallery_loader
-
         else:
-            val_num_probe = train_mvb.num_probe
-            val_probe = train_mvb.val_probe
-            val_probe_set = ImageDataset(cfg=cfg,
-                                         dataset=val_probe,
-                                         period=train_period,
-                                         dataset_type='probe',
-                                         transform=inference_transform)
-            val_probe_loader = DataLoader(val_probe_set,
-                                          batch_size=test_batch,
-                                          shuffle=False,
-                                          num_workers=num_workers,
-                                          collate_fn=val_probe_collate_fn)
-            return val_probe_loader, val_num_probe
+            val = val_mini.val
+            val_set = ImageDataset(cfg=cfg,
+                                   dataset=val,
+                                   period=train_period,
+                                   dataset_type='val',
+                                   transform=test_transform)
+            val_loader = DataLoader(val_set,
+                                    batch_size=test_batch,
+                                    shuffle=False,
+                                    num_workers=num_workers,
+                                    collate_fn = collate_fn)
+            return val_loader
 
     else:
         inference_mvb = MultiViewBaggage(cfg=cfg, dataset_type='inference')

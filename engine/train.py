@@ -23,20 +23,16 @@ def train(config, experiment_name=None):
     train_loader = build_dataloader(cfg=config,
                                     period=train_period,
                                     loader_type='train')
-    val_gallery_loader = build_dataloader(cfg=config,
-                                          period=train_period,
-                                          loader_type='gallery')
-    val_probe_loader, _ = build_dataloader(cfg=config,
-                                           period=train_period,
-                                           loader_type='probe')
+    val_loader = build_dataloader(cfg=config,
+                                  period=train_period,
+                                  loader_type='val')
 
     # prepare model
     model = build_model(cfg=config)
 
-    print('The loss type is',
-          config.MODEL.METRIC_LOSS_TYPE)
+    print('The loss type is',config.MODEL.LOSS_TYPE)
     loss_func = build_loss(config, num_classes)
-    optimizer, optimizer_center = build_optimizer(config, model)
+    optimizer = build_optimizer(config, model)
 
     # Add for using self trained model
     if config.MODEL.PRETRAIN_CHOICE == 'self':
@@ -49,11 +45,6 @@ def train(config, experiment_name=None):
         print('Path to the checkpoint of optimizer:', path_to_optimizer)
         path_to_center_param = config.MODEL.PRETRAIN_PATH.replace(
             'model', 'center_param')
-        print('Path to the checkpoint of center_param:', path_to_center_param)
-        path_to_optimizer_center = config.MODEL.PRETRAIN_PATH.replace(
-            'model', 'optimizer_center')
-        print('Path to the checkpoint of optimizer_center:',
-              path_to_optimizer_center)
         model.load_state_dict(torch.load(config.MODEL.PRETRAIN_PATH))
         optimizer.load_state_dict(torch.load(path_to_optimizer))
 
@@ -64,8 +55,7 @@ def train(config, experiment_name=None):
                                   config.SOLVER.WARMUP_METHOD)
 
     print('------------------ Start Training -------------------')
-    do_train(config, model, train_loader, val_gallery_loader,
-             val_probe_loader, optimizer, scheduler,
+    do_train(config, model, train_loader, val_loader, optimizer, scheduler,
              loss_func, experiment_name)
     print('---------------- Training Completed ---------------- ')
 

@@ -11,7 +11,6 @@ def build_optimizer(
     learning_rate_weight_decay = cfg.SOLVER.WEIGHT_DECAY  # 0.0005
     learning_rate_bias = cfg.SOLVER.BIAS_LR_FACTOR  # 2
     model_optimizer = cfg.SOLVER.OPTIMIZER_NAME  # 'Adam'
-    learning_rate_center = cfg.SOLVER.CENTER_LR  # 0.5
 
     params = []
     for key, value in model.named_parameters():

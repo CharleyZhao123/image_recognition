@@ -11,11 +11,7 @@ class MiniImageNet(object):
         self.dataset_path = cfg.MODEL.DATA_PATH
         if dataset_type is 'train':
             self.train_path = os.path.join(self.dataset_path, 'train.csv')
-            self.val_path = os.path.join(self.dataset_path, 'val.csv')
-            self.check_before_run()
-
             self.train, self.train_ids = get_train_data(self.train_path)
-            self.val, self.val_ids = get_val_data(self.val_path)
         elif dataset_type is 'val':
             self.val_path = os.path.join(self.dataset_path, 'val.csv')
             self.val, self.val_ids = get_val_data(self.val_path)
@@ -26,11 +22,11 @@ class MiniImageNet(object):
             assert 'Error: dataset_type: {} is not defined!'.format(
                 dataset_type)
 
-    def check_before_run(self):
-        check_file(self.dataset_path)
-        check_file(self.train_path)
-        check_file(self.val_path)
-        check_file(self.test_path)
+    # def check_before_run(self):
+    #     check_file(self.dataset_path)
+    #     check_file(self.train_path)
+    #     check_file(self.val_path)
+    #     check_file(self.test_path)
 
 
 class ImageDataset(Dataset):
@@ -69,7 +65,6 @@ class ImageDataset(Dataset):
             image = read_image(image_path)
             if self.transform is not None:
                 image = self.transform(image)
-
             return image, image_id
 
         elif self.dataset_type is 'val':
@@ -107,7 +102,7 @@ def get_train_data(csv_path):
         head_row = next(data_reader)
         for row in data_reader:
             image_name = row[0] # n0185567200000003.jpg
-            image_id = row[1] # n01855672
+            image_id = int(row[1][1:]) # n01855672->1855672
             train_dataset.append((image_name, image_id))
             train_name_list.append(image_name)
         del head_row
@@ -121,7 +116,7 @@ def get_val_data(csv_path):
         head_row = next(data_reader)
         for row in data_reader:
             image_name = row[0] # n0185567200000003.jpg
-            image_id = row[1] # n01855672
+            image_id = int(row[1][1:]) # n01855672
             val_dataset.append((image_name, image_id))
             val_name_list.append(image_name)
         del head_row
@@ -135,7 +130,7 @@ def get_test_data(csv_path):
         head_row = next(data_reader)
         for row in data_reader:
             image_name = row[0] # n0185567200000003.jpg
-            image_id = row[1] # n01855672
+            image_id = int(row[1][1:]) # n01855672
             test_dataset.append((image_name, image_id))
             test_name_list.append(image_name)
         del head_row

@@ -5,12 +5,10 @@ import logging
 import torch.cuda
 import numpy as np
 import torch.nn as nn
-from utils import AverageMeter, generate_merge_result
+from utils import AverageMeter
 
-
-def do_train(cfg, model, train_loader, val_gallery_loader,
-             val_probe_loader, optimizer, scheduler, loss_fn,
-             experiment_name):
+def do_train(cfg, model, train_loader, val_loader,
+             optimizer, scheduler, loss_fn, experiment_name):
     device = cfg.MODEL.DEVICE
     epochs = cfg.SOLVER.MAX_EPOCHS
     log_period = cfg.SOLVER.LOG_PERIOD
@@ -45,6 +43,7 @@ def do_train(cfg, model, train_loader, val_gallery_loader,
         for iteration, (img, vid) in enumerate(train_loader):
             optimizer.zero_grad()
             img = img.to(device)
+            vid = torch.tensor(vid)
             target = vid.to(device)
 
             score = model(img)

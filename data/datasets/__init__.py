@@ -1,1 +1,1 @@
-from .MultiViewBaggage import MultiViewBaggage, ImageDataset
+from .MiniImageNet import MiniImageNet, ImageDataset

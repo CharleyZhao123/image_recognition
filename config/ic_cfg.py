@@ -12,7 +12,7 @@ _C.PROJECT.PATH = '/space1/zhaoqing/code/image_recognition'
 _C.MODEL = CfgNode()
 _C.MODEL.DEVICE = "cuda"  # Using cuda or cpu for training
 _C.MODEL.DEVICE_ID = "3"  # ID number of GPU
-_C.MODEL.NUM_CLASSES = 4518  # classification number
+_C.MODEL.NUM_CLASSES = 64  # classification number
 _C.MODEL.NAME = 'resnet101'  # Name of backbone
 _C.MODEL.LAST_STRIDE = 1  # Last stride of backbone
 _C.MODEL.PRETRAIN_CHOICE = 'imagenet'  # Options: 'imagenet' or 'self'
@@ -23,6 +23,7 @@ _C.MODEL.LOSS_TYPE = [
 _C.MODEL.DATA_PATH = '/space1/zhaoqing/dataset/fsl/mini-imagenet'  # Path to dataset
 _C.MODEL.OUTPUT_PATH = '/space1/zhaoqing/ex/image_classification_ex'
 _C.MODEL.SAMPLER = 'random'
+_C.MODEL.DATALOADER_NUM_WORKERS = 8
 
 ##############################################################################
 # -------------------------- input configuration --------------------------- #

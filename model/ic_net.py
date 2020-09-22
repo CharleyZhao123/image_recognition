@@ -30,9 +30,9 @@ def weights_init_classifier(m):
 class ClassificationNet(nn.Module):
     in_planes = 2048
 
-    def __init__(self, num_classes, last_stride, model_path, neck, neck_feat,
+    def __init__(self, num_classes, last_stride, model_path,
                  model_name, pretrained_choice):
-        super(ReidNet, self).__init__()
+        super(ClassificationNet, self).__init__()
         if model_name == 'resnet50':
             self.backbone = ResNet50(last_stride=last_stride, block=Bottleneck)
         if model_name == 'resnet101':
@@ -53,18 +53,13 @@ class ClassificationNet(nn.Module):
 
     def forward(self, x):
         feat = self.gap(self.backbone(x))  # (b, 2048, 1, 1)
-        feat = global_feat.view(global_feat.shape[0], -1)  # flatten to (bs, 2048)
+        feat = feat.view(feat.shape[0], -1)  # flatten to (bs, 2048)
 
         if self.training:
             cls_score = self.classifier(feat)
             return cls_score  # global feature for triplet loss
         else:
-            if self.neck_feat == 'after':
-                # Test with feature after BN
-                return feat
-            else:
-                # Test with feature before BN
-                return global_feat
+            return feat
 
     # load pretrained ReidNet
     def load_param(self, trained_path):
@@ -76,4 +71,4 @@ class ClassificationNet(nn.Module):
 
 
 if __name__ == '__main__':
-    reid = ReidNet()
+    reid = ClassificationNet()
