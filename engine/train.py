@@ -17,11 +17,6 @@ from solver import build_optimizer, WarmUpMultiStepLR
 
 def train(config, experiment_name=None):
     num_classes = config.MODEL.NUM_CLASSES
-    class_begin = config.MODEL.CLASS_BEGIN
-    class_end = config.MODEL.CLASS_END
-
-    if num_classes != class_end - class_begin + 1:
-        raise Exception(" NUM_CLASSES is not equal to ( CLASS_END - CLASS_BEGIN +1 )")
 
     # dataloader for training
     train_period = 'train'

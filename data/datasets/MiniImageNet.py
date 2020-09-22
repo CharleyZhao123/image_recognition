@@ -1,5 +1,5 @@
 import os
-import json
+import csv
 from PIL import Image
 from torch.utils.data import Dataset
 
@@ -10,22 +10,18 @@ class MiniImageNet(object):
 
         self.dataset_path = cfg.MODEL.DATA_PATH
         if dataset_type is 'train':
-            self.train_path = os.path.join(self.dataset_path, 'MVB_train',
-                                           'Info', 'train+val_gallery.json')
-            self.val_path = os.path.join(self.dataset_path, 'MVB_train',
-                                         'Image', 'val')
+            self.train_path = os.path.join(self.dataset_path, 'train.csv')
+            self.val_path = os.path.join(self.dataset_path, 'val.csv')
             self.check_before_run()
 
-            self.train, self.train_gallery_ids = get_train_data(
-                self.train_path, begin_id=cfg.MODEL.CLASS_BEGIN, end_id=cfg.MODEL.CLASS_END)
-
-            self.val_gallery, self.val_probe, self.num_probe = get_gallery_and_probe_data(
-                self.val_path)
-        elif dataset_type is 'inference':
-            self.inference_path = os.path.join(self.dataset_path, 'MVB_val',
-                                               'Image')
-            self.inference_gallery, self.inference_probe, self.num_probe = get_gallery_and_probe_data(
-                self.inference_path)
+            self.train, self.train_ids = get_train_data(self.train_path)
+            self.val, self.val_ids = get_val_data(self.val_path)
+        elif dataset_type is 'val':
+            self.val_path = os.path.join(self.dataset_path, 'val.csv')
+            self.val, self.val_ids = get_val_data(self.val_path)
+        elif dataset_type is 'test':
+            self.test_path = os.path.join(self.dataset_path, 'test.csv')
+            self.test, self.test_id = get_test_data(self.test_path)
         else:
             assert 'Error: dataset_type: {} is not defined!'.format(
                 dataset_type)
@@ -34,6 +30,7 @@ class MiniImageNet(object):
         check_file(self.dataset_path)
         check_file(self.train_path)
         check_file(self.val_path)
+        check_file(self.test_path)
 
 
 class ImageDataset(Dataset):
@@ -44,9 +41,9 @@ class ImageDataset(Dataset):
                  dataset_type='train',
                  transform=None):
 
-        assert dataset_type in ['train', 'gallery', 'probe'], \
+        assert dataset_type in ['train', 'val', 'test'], \
             'ImageDataset Error: dataset_type: {} is not defined!'.format(dataset_type)
-        assert period in ['train', 'inference'], \
+        assert period in ['train', 'test'], \
             'ImageDataset Error: period: {} is not defined!'.format(period)
 
         self.dataset = dataset
@@ -56,106 +53,93 @@ class ImageDataset(Dataset):
         self.period = period
 
         if self.period is 'train':
-            image_dir = 'MVB_train/Image'
+            image_dir = 'images'
             if self.dataset_type is not 'train':
-                image_dir = 'MVB_train/Image/val'
+                image_dir = 'images'
         else:
-            image_dir = 'MVB_val/Image'
+            image_dir = 'images'
         self.image_dir = image_dir
 
     def __getitem__(self, item):
         if self.dataset_type is 'train':
-            train_image_dir = os.path.join(self.image_dir, 'train+val_gallery')
-            _, image_name, image_datatype, baggage_id, baggage_material = self.dataset[
-                item]
+            train_image_dir = self.image_dir
+            image_name, image_id = self.dataset[item]
             image_path = os.path.join(self.dataset_path, train_image_dir,
                                       image_name)
             image = read_image(image_path)
             if self.transform is not None:
                 image = self.transform(image)
 
-            return image, baggage_id, image_datatype, baggage_material
+            return image, image_id
 
-        elif self.dataset_type is 'gallery':
-            gallery_image_dir = os.path.join(self.image_dir, 'gallery')
-            image_name, image_datatype, baggage_id = self.dataset[item]
-            image_path = os.path.join(self.dataset_path, gallery_image_dir,
+        elif self.dataset_type is 'val':
+            val_image_dir = self.image_dir
+            image_name, image_id = self.dataset[item]
+            image_path = os.path.join(self.dataset_path, val_image_dir,
                                       image_name)
             image = read_image(image_path)
             if self.transform is not None:
                 image = self.transform(image)
 
-            return image, baggage_id, image_datatype
+            return image, image_id
 
-        elif self.dataset_type is 'probe':
-            probe_image_dir = os.path.join(self.image_dir, 'probe')
-            image_name, image_datatype = self.dataset[item]
-            image_path = os.path.join(self.dataset_path, probe_image_dir,
+        elif self.dataset_type is 'test':
+            test_image_dir = self.image_dir
+            image_name, image_id = self.dataset[item]
+            image_path = os.path.join(self.dataset_path, test_image_dir,
                                       image_name)
             image = read_image(image_path)
 
             if self.transform is not None:
                 image = self.transform(image)
 
-            if self.period is 'train':
-                baggage_id = int(image_name[:4])
-                return image, image_name, baggage_id, image_datatype
-
-            return image, image_name[:-4], image_datatype
+            return image, image_id
 
     def __len__(self):
         return len(self.dataset)
 
 
-def get_train_data(json_path, begin_id, end_id):
-    baggage_dataset = []
-    gallery_id_list = []
-    with open(json_path, 'r') as f:
-        images = json.loads(f.read())["image"]
-        for image in images:
-            baggage_id = int(image["id"])
-            if begin_id <= baggage_id <= end_id:
-                baggage_id = baggage_id-begin_id 
-                image_id = image["image_id"]
-                image_name = image["image_name"]
-                image_datatype = image["datatype"]
-                baggage_material = image["material"]
-                baggage_dataset.append((image_id, image_name, image_datatype,
-                                        baggage_id, baggage_material))
-                if image_datatype is 'g':
-                    gallery_id_list.append(image_id)
-        return baggage_dataset, gallery_id_list
+def get_train_data(csv_path):
+    train_dataset = []
+    train_name_list = []
+    with open(csv_path, 'r') as f:
+        data_reader = csv.reader(f)
+        head_row = next(data_reader)
+        for row in data_reader:
+            image_name = row[0] # n0185567200000003.jpg
+            image_id = row[1] # n01855672
+            train_dataset.append((image_name, image_id))
+            train_name_list.append(image_name)
+        del head_row
+        return train_dataset, train_name_list
 
+def get_val_data(csv_path):
+    val_dataset = []
+    val_name_list = []
+    with open(csv_path, 'r') as f:
+        data_reader = csv.reader(f)
+        head_row = next(data_reader)
+        for row in data_reader:
+            image_name = row[0] # n0185567200000003.jpg
+            image_id = row[1] # n01855672
+            val_dataset.append((image_name, image_id))
+            val_name_list.append(image_name)
+        del head_row
+        return val_dataset, val_name_list
 
-def get_gallery_and_probe_data(path):
-    gallery_path = os.path.join(path, 'gallery')
-    probe_path = os.path.join(path, 'probe')
-    check_file(gallery_path)
-    check_file(probe_path)
-
-    gallery_baggage_dataset = []
-    probe_baggage_dataset = []
-
-    for root, dirs, files in os.walk(gallery_path, topdown=True):
-        for name in files:
-            if not name[-4:] == '.jpg':
-                continue
-            baggage_image_info = name.split('_')
-            image_name = name
-            image_datatype = 'g'
-            baggage_id = int(baggage_image_info[0])
-            gallery_baggage_dataset.append(
-                (image_name, image_datatype, baggage_id))
-
-    for root, dirs, files in os.walk(probe_path, topdown=True):
-        for name in files:
-            image_name = name
-            image_datatype = 'p'
-            probe_baggage_dataset.append((image_name, image_datatype))
-
-    return gallery_baggage_dataset, probe_baggage_dataset, len(
-        probe_baggage_dataset)
-
+def get_test_data(csv_path):
+    test_dataset = []
+    test_name_list = []
+    with open(csv_path, 'r') as f:
+        data_reader = csv.reader(f)
+        head_row = next(data_reader)
+        for row in data_reader:
+            image_name = row[0] # n0185567200000003.jpg
+            image_id = row[1] # n01855672
+            test_dataset.append((image_name, image_id))
+            test_name_list.append(image_name)
+        del head_row
+        return test_dataset, test_name_list
 
 def read_image(img_path):
     """Keep reading image until succeed.
@@ -180,38 +164,33 @@ def check_file(path):
 
 
 if __name__ == '__main__':
-    from data.transforms import build_transform
+    import sys
+    sys.path.append("..")
+    from transforms import build_transform
 
-    train_mvb = MultiViewBaggage(dataset_type='train')
-    inference_mvb = MultiViewBaggage(dataset_type='inference')
+    train_mini = MiniImageNet(dataset_type='train')
+    val_mini = MiniImageNet(dataset_type='val')
+    test_mini = MiniImageNet(dataset_type='test')
 
-    train = train_mvb.train
-    train_val_probe = train_mvb.train_val_probe
-    train_val_gallery = train_mvb.train_val_gallery
-    train_num_probe = train_mvb.num_probe
-
-    inference_probe = inference_mvb.inference_probe
-    inference_gallery = inference_mvb.inference_gallery
-    inference_num_probe = inference_mvb.num_probe
+    train = train_mini.train
+    val = val_mini.val
+    test = test_mini.test
 
     train_period = 'train'
-    inference_period = 'inference'
+    test_period = 'test'
+
     train_transform = build_transform(period=train_period)
-    inference_transform = build_transform(period=inference_period)
+    test_transform = build_transform(period=test_period)
 
-    # mvb_dataset = ImageDataset(dataset=train, period=train_period, dataset_type='train', transform=train_transform)
-    # mvb_dataset = ImageDataset(dataset=train_val_probe, period=train_period, dataset_type='probe', transform=inference_transform)
-    # mvb_dataset = ImageDataset(dataset=train_val_gallery, period=train_period, dataset_type='gallery', transform=inference_transform)
-    # mvb_dataset = ImageDataset(dataset=inference_probe, period=inference_period, dataset_type='probe', transform=inference_transform)
-    mvb_dataset = ImageDataset(dataset=inference_gallery,
-                               period=inference_period,
-                               dataset_type='gallery',
-                               transform=inference_transform)
+    mini_dataset = ImageDataset(dataset=train,
+                                period=train_period,
+                                dataset_type='train',
+                                transform=train_transform)
 
-    print(mvb_dataset.__len__())
+    print(mini_dataset.__len__())
     batch = 3
     import random
     for i in range(batch):
         index = random.randint(0, 293)
-        print(mvb_dataset.__getitem__(index))
+        print(mini_dataset.__getitem__(index))
     print('done')

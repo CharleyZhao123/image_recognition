@@ -13,8 +13,6 @@ _C.MODEL = CfgNode()
 _C.MODEL.DEVICE = "cuda"  # Using cuda or cpu for training
 _C.MODEL.DEVICE_ID = "3"  # ID number of GPU
 _C.MODEL.NUM_CLASSES = 4518  # classification number
-_C.MODEL.CLASS_BEGIN = 0  # train luggage begin id
-_C.MODEL.CLASS_END = 4517  # train luggage end id
 _C.MODEL.NAME = 'resnet101'  # Name of backbone
 _C.MODEL.LAST_STRIDE = 1  # Last stride of backbone
 _C.MODEL.PRETRAIN_CHOICE = 'imagenet'  # Options: 'imagenet' or 'self'
@@ -39,7 +37,6 @@ _C.INPUT.PIXEL_STD = [0.229, 0.224,
 _C.INPUT.FLIP_PROB = 0.5  # Random probability for image horizontal flip
 _C.INPUT.ERASE_PROB = 0.5  # Random probability for random erasing
 _C.INPUT.IMG_PADDING = 10  # Value of padding size
-_C.INPUT.ROTATE_PROB = 0.5  # Probablity for image rotation
 
 ##############################################################################
 # -------------------------- solver configuration -------------------------- #

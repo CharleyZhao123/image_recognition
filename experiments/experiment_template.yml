@@ -13,7 +13,6 @@ INPUT:
   SIZE_TRAIN: [224, 224]
   SIZE_TEST: [224, 224]
   FLIP_PROB: 0.5 # random horizontal flip
-  ROTATE_PROB: 0.5
   IMG_PADDING: 10
 
 SOLVER:

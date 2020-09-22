@@ -29,9 +29,9 @@ def inference_probe_collate_fn(batch):
 
 # 5 types of dataloader: train:[train, gallery, probe]; inference:[gallery, probe]
 def build_dataloader(cfg, period='train', loader_type='train'):
-    assert loader_type in ['train', 'gallery', 'probe'], \
+    assert loader_type in ['train', 'val', 'test'], \
         'Dataloader Error: loader_type: {} is not defined!'.format(loader_type)
-    assert period in ['train', 'inference'], \
+    assert period in ['train', 'test'], \
         'Dataloader Error: period: {} is not defined!'.format(period)
 
     num_workers = cfg.MODEL.DATALOADER_NUM_WORKERS
