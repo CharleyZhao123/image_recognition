@@ -1,6 +1,5 @@
 # Image Recognition (Classification)
 
----
 
 ## 配置
 
