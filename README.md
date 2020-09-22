@@ -67,4 +67,20 @@ pytorch>1.1
 
 ## 测试
 
-未完成
+运行脚本run_test.sh
+
+结果：
+
+```yaml
+2020-09-22 23:02:33,294 image_classification.test INFO: Enter Image Classification Test
+2020-09-22 23:02:35,671 image_classification.test INFO: Iteration[1/10], Test_Acc: 0.922
+2020-09-22 23:02:35,793 image_classification.test INFO: Iteration[2/10], Test_Acc: 0.945
+2020-09-22 23:02:35,893 image_classification.test INFO: Iteration[3/10], Test_Acc: 0.953
+2020-09-22 23:02:35,992 image_classification.test INFO: Iteration[4/10], Test_Acc: 0.957
+2020-09-22 23:02:36,091 image_classification.test INFO: Iteration[5/10], Test_Acc: 0.953
+2020-09-22 23:02:36,189 image_classification.test INFO: Iteration[6/10], Test_Acc: 0.951
+2020-09-22 23:02:36,288 image_classification.test INFO: Iteration[7/10], Test_Acc: 0.926
+2020-09-22 23:02:36,388 image_classification.test INFO: Iteration[8/10], Test_Acc: 0.926
+2020-09-22 23:02:36,492 image_classification.test INFO: Iteration[9/10], Test_Acc: 0.932
+2020-09-22 23:02:37,125 image_classification.test INFO: Iteration[10/10], Test_Acc: 0.935
+```
