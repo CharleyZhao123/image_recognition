@@ -57,9 +57,10 @@ class ClassificationNet(nn.Module):
 
         if self.training:
             cls_score = self.classifier(feat)
-            return cls_score  # global feature for triplet loss
+            return cls_score
         else:
-            return feat
+            cls_score = self.classifier(feat)
+            return cls_score
 
     # load pretrained ReidNet
     def load_param(self, trained_path):

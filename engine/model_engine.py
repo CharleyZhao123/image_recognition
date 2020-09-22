@@ -16,8 +16,6 @@ def do_train(cfg, model, train_loader, val_loader,
     checkpoint_period = cfg.SOLVER.CHECKPOINT_PERIOD
     output_dir = os.path.join(cfg.MODEL.OUTPUT_PATH, experiment_name)
 
-    val_period = 'val'
-
     logger = logging.getLogger('{}.train'.format(cfg.PROJECT.NAME))
     logger.info('start training')
 
@@ -97,10 +95,10 @@ def do_train(cfg, model, train_loader, val_loader,
                     val_loss_meter.update(loss.item(), img.shape[0])
                     val_acc_meter.update(acc, 1) 
 
-                logger.info(
-                    "Epoch[{}/{}] Iteration[{}/{}] Val_Loss: {:.3f}, Val_Acc: {:.3f}"
-                    .format(epoch, epochs, (iteration + 1), len(val_loader),
-                            val_loss_meter.avg, val_acc_meter.avg))
+                    logger.info(
+                        "Epoch[{}/{}] Iteration[{}/{}] Val_Loss: {:.3f}, Val_Acc: {:.3f}"
+                        .format(epoch, epochs, (iteration + 1), len(val_loader),
+                                val_loss_meter.avg, val_acc_meter.avg))
 
 def do_inference(cfg, model, inference_gallery_loader, inference_probe_loader,
                  experiment_name):
