@@ -50,7 +50,7 @@ _C.SOLVER.BIAS_LR_FACTOR = 2  # Factor of learning bias
 _C.SOLVER.MOMENTUM = 0.9  # SGD Momentum
 _C.SOLVER.GAMMA = 0.1  # decay rate of learning rate
 _C.SOLVER.STEPS = (30, 55)  # decay step of learning rate
-_C.SOLVER.ID_LOSS_WEIGHT = 0.5  # Balanced weight of id loss
+_C.SOLVER.ID_LOSS_WEIGHT = 1  # Balanced weight of id loss
 
 # Settings of weight decay
 _C.SOLVER.WEIGHT_DECAY = 0.0005

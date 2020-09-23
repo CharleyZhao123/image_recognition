@@ -58,8 +58,12 @@ def do_train(cfg, model, train_loader, val_loader,
 
             loss.backward()
             optimizer.step()
-
-            acc = (score.max(1)[1] == target).float().mean()
+            
+            # target_select = (target == 2)
+            # target[target_select] = target[target_select] - 1
+            # score = torch.cat((score[:,0:2],score[:,3:]),axis=1)
+            acc = (score.max(1)[1] == target).float()
+            acc = acc.mean()
             train_loss_meter.update(loss.item(), img.shape[0])
             train_acc_meter.update(acc, 1)
 

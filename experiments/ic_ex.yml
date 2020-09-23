@@ -1,0 +1,42 @@
+# Modify your personal path here and run with this config
+
+PROJECT:
+  PATH: '/space1/zhaoqing/code/image_recognition'
+
+MODEL:
+  PRETRAIN_PATH: '/space1/zhaoqing/code/resnet50-19c8e357.pth'
+  OUTPUT_PATH: '/space1/zhaoqing/ex/image_classification_ex/ic_sim_addtrue'
+  DATA_PATH: '/space1/zhaoqing/dataset/ic'
+  NAME: 'resnet50'
+
+INPUT:
+  SIZE_TRAIN: [224, 224]
+  SIZE_TEST: [224, 224]
+  FLIP_PROB: 0.5 # random horizontal flip
+  IMG_PADDING: 10
+
+SOLVER:
+  OPTIMIZER_NAME: "Adam"
+  MAX_EPOCHS: 100
+  BASE_LR: 0.0003
+
+  BIAS_LR_FACTOR: 1
+  WEIGHT_DECAY: 0.0005
+  WEIGHT_DECAY_BIAS: 0.0005
+  IMS_PER_BATCH: 64
+
+  STEPS: [40, 70]
+  GAMMA: 0.1
+
+  WARMUP_FACTOR: 0.01
+  WARMUP_ITERS: 10
+  WARMUP_METHOD: "linear"
+
+  CHECKPOINT_PERIOD: 2
+  LOG_PERIOD: 1
+  EVAL_PERIOD: 1
+ 
+TEST:
+  WEIGHT: '/space1/zhaoqing/ex/image_classification_ex/ic_sim_addtrue/ic_true_ex/Image_Classification_ic_true_ex_8.pth'
+  IMS_PER_BATCH: 80
+  FEAT_NORM: 'yes'

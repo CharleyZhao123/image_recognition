@@ -1,6 +1,10 @@
 import torch
 import torch.optim
 
+def set_bn_eval(m):
+    classname = m.__class__.__name__
+    if classname.find('BatchNorm') != -1:
+      m.eval()
 
 def build_optimizer(
         cfg,
@@ -12,10 +16,16 @@ def build_optimizer(
     learning_rate_bias = cfg.SOLVER.BIAS_LR_FACTOR  # 2
     model_optimizer = cfg.SOLVER.OPTIMIZER_NAME  # 'Adam'
 
+    # model.apply(set_bn_eval) # freeze bn 
     params = []
     for key, value in model.named_parameters():
-        if not value.requires_grad:
-            continue
+
+        # freeze model
+        # flag = 'classifier' in key or 'layer4.2' in key
+        # if not value.requires_grad or not flag:
+        #     continue
+        # print(key)
+
         lr = base_learning_rate
         weight_decay = learning_rate_weight_decay
         if "bias" in key:
@@ -32,6 +42,5 @@ def build_optimizer(
 
 if __name__ == '__main__':
     from model.resnet50 import ResNet50
-
     net = ResNet50(last_stride=2)
     resnet50_optimizer = build_optimizer(net)

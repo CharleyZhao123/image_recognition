@@ -1,21 +1,25 @@
 import torch.nn.functional as f
+import torch.nn as nn
+import torch
 from loss.softmax_with_label_smoothing import CrossEntropyLabelSmooth
 
 
-# def build_loss(score, feat, target):
 def build_loss(cfg, num_classes):
     loss_metric = cfg.MODEL.LOSS_TYPE  # [’default', 'label_smoothing']
     id_loss_weight = cfg.SOLVER.ID_LOSS_WEIGHT  # 1
 
-    label_smoothing = CrossEntropyLabelSmooth(
-        num_classes=num_classes)  # softmax_with_label_smoothing
+    label_smoothing = CrossEntropyLabelSmooth(num_classes=num_classes)  # softmax_with_label_smoothing
 
     def loss_func(score, target):
         loss = id_loss_weight * f.cross_entropy(score, target)  # softmax loss
 
         if 'label_smoothing' in loss_metric:
-            loss = id_loss_weight * label_smoothing(
-                score, target)  # cover softmax loss
+            loss = id_loss_weight * label_smoothing(score, target)  # cover softmax loss
+        elif 'nll' in loss_metric:
+            # print(score)
+            loss_NLL = nn.NLLLoss()
+            loss = id_loss_weight*loss_NLL(torch.log(score), target)
+            # print(loss)
         return loss
 
     return loss_func

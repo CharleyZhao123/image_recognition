@@ -7,7 +7,7 @@ from config import cfg
 from loss import build_loss
 from model import build_model
 from torch.backends import cudnn
-from data import build_dataloader
+from data import build_dataloader_ic
 from utils.logger import setup_logger
 from utils.plot_curve import plot_curve
 from engine.model_engine import do_train
@@ -19,10 +19,10 @@ def train(config, experiment_name=None):
 
     # dataloader for training
     train_period = 'train'
-    train_loader = build_dataloader(cfg=config,
+    train_loader = build_dataloader_ic(cfg=config,
                                     period=train_period,
                                     loader_type='train')
-    val_loader = build_dataloader(cfg=config,
+    val_loader = build_dataloader_ic(cfg=config,
                                   period=train_period,
                                   loader_type='val')
 
@@ -42,8 +42,6 @@ def train(config, experiment_name=None):
         path_to_optimizer = config.MODEL.PRETRAIN_PATH.replace(
             'model', 'optimizer')
         print('Path to the checkpoint of optimizer:', path_to_optimizer)
-        path_to_center_param = config.MODEL.PRETRAIN_PATH.replace(
-            'model', 'center_param')
         model.load_state_dict(torch.load(config.MODEL.PRETRAIN_PATH))
         optimizer.load_state_dict(torch.load(path_to_optimizer))
 
