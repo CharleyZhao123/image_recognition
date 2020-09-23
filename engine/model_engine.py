@@ -5,7 +5,10 @@ import logging
 import torch.cuda
 import numpy as np
 import torch.nn as nn
+import csv
 from utils import AverageMeter
+from utils import generate_result
+
 
 def do_train(cfg, model, train_loader, val_loader,
              optimizer, scheduler, loss_fn, experiment_name):
@@ -105,7 +108,6 @@ def do_test(cfg, model, test_loader, experiment_name):
     test_acc_meter.reset()
 
     device = cfg.MODEL.DEVICE
-    # output_dir = os.path.join(cfg.MODEL.OUTPUT_PATH, experiment_name)
 
     logger = logging.getLogger('{}.test'.format(cfg.PROJECT.NAME))
     logger.info("Enter Image Classification Test")
@@ -117,15 +119,22 @@ def do_test(cfg, model, test_loader, experiment_name):
             model = nn.DataParallel(model)
         model.to(device)
 
-    model.eval()
+    # generate result csv
+    output_dir = os.path.join(cfg.MODEL.OUTPUT_PATH, experiment_name)
+    result_path = os.path.join(
+        output_dir,
+        experiment_name  + '_' + 'test_result.csv')
+    with open(result_path, 'w') as f:
+        f.write("file_name,label,predictive_label")
 
-    for iteration, (img, vid) in enumerate(test_loader):
+    model.eval()
+    for iteration, (img, vid, vname) in enumerate(test_loader):
         with torch.no_grad():
             img = img.to(device)
             vid = torch.tensor(vid)
             target = vid.to(device)            
             score = model(img)
-
+            p_label = score.max(1)[1]
             acc = (score.max(1)[1] == target).float().mean()
             test_acc_meter.update(acc, 1)
 
@@ -133,14 +142,13 @@ def do_test(cfg, model, test_loader, experiment_name):
                 "Iteration[{}/{}], Test_Acc: {:.3f}"
                 .format((iteration + 1), len(test_loader), test_acc_meter.avg))
 
-    # result_path = os.path.join(
-    #     output_dir,
-    #     experiment_name  + '_' + 'test_result.csv')
+        with open(result_path, 'a+') as f:
+            for i in range(len(vid)):
+                name = list(vname)[i]
+                label = str(vid[i].item())
+                p_label_ = str(p_label[i].item())
+                f.write('\n')
+                f.write(name +','+label+ ',' +p_label_)
 
-    # generate_merge_result(cfg,
-    #                       probe_features,
-    #                       gallery_features,
-    #                       probe_image_names,
-    #                       gallery_baggage_ids,
-    #                       metric=embedding_metric,
-    #                       result_path=result_path)
+        # generate_result()
+

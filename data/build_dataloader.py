@@ -9,6 +9,10 @@ def collate_fn(batch):
     images, image_ids = zip(*batch)
     return torch.stack(images, dim=0), image_ids
 
+def collate_fn_test(batch):
+    images, image_ids, image_names = zip(*batch)
+    return torch.stack(images, dim=0), image_ids, image_names
+
 # 5 types of dataloader: train:[train, gallery, probe]; inference:[gallery, probe]
 def build_dataloader(cfg, period='train', loader_type='train'):
     assert loader_type in ['train', 'val', 'test'], \
@@ -79,7 +83,7 @@ def build_dataloader(cfg, period='train', loader_type='train'):
                                  batch_size=test_batch,
                                  shuffle=False,
                                  num_workers=num_workers,
-                                 collate_fn = collate_fn)
+                                 collate_fn = collate_fn_test)
         return test_loader
 
 
