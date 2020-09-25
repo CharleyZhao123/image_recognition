@@ -18,15 +18,17 @@ def build_transform(cfg, period='train'):
     normalize_transform = transforms.Normalize(mean=pixel_mean, std=pixel_std)
     if period is 'train':
         transform = transforms.Compose([
-            transforms.RandomRotation(20),
+            # transforms.Grayscale(num_output_channels=3),
+            # transforms.RandomRotation(20),
             transforms.Resize(input_size),
             transforms.RandomHorizontalFlip(horizontal_flip_probability),
             transforms.Pad(padding_size),
-            transforms.RandomCrop(input_size),
+            # transforms.RandomCrop(input_size),
             transforms.ToTensor(), normalize_transform,
         ])
     else:
         transform = transforms.Compose([
+            # transforms.Grayscale(num_output_channels=3),
             transforms.Resize(input_size),
             transforms.ToTensor(), normalize_transform,
         ])

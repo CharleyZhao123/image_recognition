@@ -16,14 +16,15 @@ def build_optimizer(
     learning_rate_bias = cfg.SOLVER.BIAS_LR_FACTOR  # 2
     model_optimizer = cfg.SOLVER.OPTIMIZER_NAME  # 'Adam'
 
-    # model.apply(set_bn_eval) # freeze bn 
+    model.apply(set_bn_eval) # freeze bn 
     params = []
     for key, value in model.named_parameters():
 
         # freeze model
         # flag = 'classifier' in key or 'layer4.2' in key
-        # if not value.requires_grad or not flag:
-        #     continue
+        flag = 'classifier' in key or 'layer4' in key
+        if not value.requires_grad or not flag:
+            continue
         # print(key)
 
         lr = base_learning_rate
