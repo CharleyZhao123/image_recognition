@@ -5,7 +5,7 @@ PROJECT:
 
 MODEL:
   PRETRAIN_PATH: '/space1/zhaoqing/code/resnet50-19c8e357.pth'
-  OUTPUT_PATH: '/space1/zhaoqing/ex/image_classification_ex/ic_sim_more_addtrue'
+  OUTPUT_PATH: '/space1/zhaoqing/ex/image_classification_ex/ic_sim_record'
   DATA_PATH: '/space1/zhaoqing/dataset/ic'
   NAME: 'resnet50'
 
@@ -17,7 +17,7 @@ INPUT:
 
 SOLVER:
   OPTIMIZER_NAME: "Adam"
-  MAX_EPOCHS: 100
+  MAX_EPOCHS: 30
   BASE_LR: 0.0003
 
   BIAS_LR_FACTOR: 1
@@ -37,6 +37,6 @@ SOLVER:
   EVAL_PERIOD: 1
  
 TEST:
-  WEIGHT: '/space1/zhaoqing/ex/image_classification_ex/ic_sim_addtrue_withoutrotate_withoutcrop_freeze_lrchange/ex2/ic_ex/Image_Classification_ic_ex_77.pth'
+  WEIGHT: '/space1/zhaoqing/ex/image_classification_ex/ic_sim_record/ic_ex/Image_Classification_ic_ex_21.pth'
   IMS_PER_BATCH: 80
   FEAT_NORM: 'yes'

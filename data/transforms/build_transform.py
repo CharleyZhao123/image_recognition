@@ -22,7 +22,7 @@ def build_transform(cfg, period='train'):
             # transforms.RandomRotation(20),
             transforms.Resize(input_size),
             transforms.RandomHorizontalFlip(horizontal_flip_probability),
-            transforms.Pad(padding_size),
+            # transforms.Pad(padding_size),
             # transforms.RandomCrop(input_size),
             transforms.ToTensor(), normalize_transform,
         ])

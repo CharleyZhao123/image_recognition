@@ -10,7 +10,7 @@ class IC(object):
 
         self.dataset_path = cfg.MODEL.DATA_PATH
         if dataset_type is 'train':
-            self.train_path = os.path.join(self.dataset_path, 'train_simulation_more_addtrue.csv')
+            self.train_path = os.path.join(self.dataset_path, 'train_simulation_addmoretrue.csv')
             self.train, self.train_names = get_train_data(self.train_path)
         elif dataset_type is 'val':
             self.val_path = os.path.join(self.dataset_path, 'test_true.csv')
