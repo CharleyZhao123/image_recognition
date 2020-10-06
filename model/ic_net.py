@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-from model.resnet50 import ResNet50, Bottleneck, ResNet101
+from model.resnet50 import ResNet50, Bottleneck, ResNet101, ResNet18
 from model.resnet_ibn_a import resnet50_ibn_a
 
 
@@ -36,8 +36,10 @@ class ClassificationNet(nn.Module):
         if model_name == 'resnet50':
             self.backbone = ResNet50(last_stride=last_stride, block=Bottleneck)
         if model_name == 'resnet101':
-            self.backbone = ResNet101(last_stride=last_stride,
-                                      block=Bottleneck)
+            self.backbone = ResNet101(last_stride=last_stride, block=Bottleneck)
+        if model_name == 'resnet18':
+            self.backbone = ResNet18(last_stride=last_stride, block=Bottleneck)        
+
         elif model_name == 'resnet50_ibn_a':
             self.backbone = resnet50_ibn_a(last_stride)
 
