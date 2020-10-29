@@ -5,7 +5,7 @@ sys.path.append('.')
 from config import cfg
 from model import build_model
 from torch.backends import cudnn
-from data import build_dataloader_ic
+from data import build_dataloader
 from utils.logger import setup_logger
 from engine.model_engine import do_test
 
@@ -13,7 +13,7 @@ from engine.model_engine import do_test
 def test(config, experiment_name=None):
     # dataloader for test
     test_period = 'test'
-    test_loader = build_dataloader_ic(cfg=config,
+    test_loader = build_dataloader(cfg=config,
                                    period=test_period,
                                    loader_type='test')
 

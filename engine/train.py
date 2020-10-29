@@ -7,7 +7,7 @@ from config import cfg
 from loss import build_loss
 from model import build_model
 from torch.backends import cudnn
-from data import build_dataloader_ic
+from data import build_dataloader
 from utils.logger import setup_logger
 from utils.plot_curve import plot_curve
 from engine.model_engine import do_train
@@ -19,10 +19,10 @@ def train(config, experiment_name=None):
 
     # dataloader for training
     train_period = 'train'
-    train_loader = build_dataloader_ic(cfg=config,
+    train_loader = build_dataloader(cfg=config,
                                     period=train_period,
                                     loader_type='train')
-    val_loader = build_dataloader_ic(cfg=config,
+    val_loader = build_dataloader(cfg=config,
                                   period=train_period,
                                   loader_type='val')
 

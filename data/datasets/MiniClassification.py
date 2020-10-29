@@ -10,13 +10,13 @@ class MiniClassification(object):
 
         self.dataset_path = cfg.MODEL.DATA_PATH
         if dataset_type is 'train':
-            self.train_path = os.path.join(self.dataset_path, 'mini_ic', 'ic_train.csv')
+            self.train_path = os.path.join(self.dataset_path, 'mini_pre', 'mini_pre_train_1.csv')
             self.train, self.train_names = get_train_data(self.train_path)
         elif dataset_type is 'val':
-            self.val_path = os.path.join(self.dataset_path, 'mini_ic', 'ic_val.csv')
+            self.val_path = os.path.join(self.dataset_path, 'mini_pre', 'mini_pre_val.csv')
             self.val, self.val_names = get_val_data(self.val_path)
         elif dataset_type is 'test':
-            self.test_path = os.path.join(self.dataset_path, 'mini_ic', 'ic_test.csv')
+            self.test_path = os.path.join(self.dataset_path, 'mini_pre', 'mini_pre_test.csv')
             self.test, self.test_names = get_test_data(self.test_path)
         else:
             assert 'Error: dataset_type: {} is not defined!'.format(

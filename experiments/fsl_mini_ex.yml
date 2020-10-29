@@ -6,8 +6,8 @@ PROJECT:
 MODEL:
   PRETRAIN_PATH: '/space1/zhaoqing/code/resnet50-19c8e357.pth'
   # PRETRAIN_PATH: '/space1/zhaoqing/code/resnet18-5c106cde.pth'
-  OUTPUT_PATH: '/space1/zhaoqing/ex/image_classification_ex/ic_test'
-  DATA_PATH: '/space1/zhaoqing/dataset/ic'
+  OUTPUT_PATH: '/space1/zhaoqing/ex/fsl_pre_ex/mini_resnet50_1'
+  DATA_PATH: '/space1/zhaoqing/dataset/fsl/miniimagenet_origin'
   NAME: 'resnet50'
 
 INPUT:
@@ -24,7 +24,7 @@ SOLVER:
   BIAS_LR_FACTOR: 1
   WEIGHT_DECAY: 0.0005
   WEIGHT_DECAY_BIAS: 0.0005
-  IMS_PER_BATCH: 80
+  IMS_PER_BATCH: 5
 
   STEPS: [30, 50]
   GAMMA: 0.5
@@ -38,7 +38,6 @@ SOLVER:
   EVAL_PERIOD: 1
  
 TEST:
-  WEIGHT: '/space1/zhaoqing/ex/image_classification_ex/ic_sim_78_79/ic_ex/78_79.pth' # sim
-  # WEIGHT: '/space1/zhaoqing/ex/image_classification_ex/ic_true_84_83/addmoretrue_final/ic_ex/84_83.pth' # true
-  IMS_PER_BATCH: 100
+  WEIGHT: '/space1/zhaoqing/ex/fsl_pre_ex/mini_resnet50_1/fsl_mini_ex/Image_Classification_fsl_mini_ex_5.pth' # sim
+  IMS_PER_BATCH: 60
   FEAT_NORM: 'yes'
